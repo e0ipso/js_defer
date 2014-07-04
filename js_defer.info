@@ -1,0 +1,4 @@
+name = Deferred JS
+description = Strategy to improve percieved frontend performance for special pages.
+dependencies[] = libraries
+core = 7.x

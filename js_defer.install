@@ -1,0 +1,43 @@
+<?php
+
+/**
+ * @file
+ * Install file implementation.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function js_defer_requirements($phase) {
+  $requirements = array();
+  // Ensure translations don't break during installation.
+  $t = get_t();
+
+  // Disable these checks at install time, because failure then causes more
+  // problems due to module dependencies and Drupal's poor handling of
+  // requirement errors.
+  if ($phase != 'runtime') {
+    return $requirements;
+  }
+
+  // Check if the JS libraries are present.
+  $libraries = array('EventEmitter', 'lazyload');
+  $missing_libraries = array();
+  foreach ($libraries as $library_name) {
+    $library_info = libraries_get_path($library_name);
+    if (empty($library_info)) {
+      $missing_libraries[] = $library_name;
+    }
+  }
+  if (!empty($missing_libraries)) {
+    $requirements['js_defer'] = array(
+      'title' => $t('JS Deferred'),
+      'severity' => REQUIREMENT_ERROR,
+      'value' => $t('Missing javascript libraries: @libs', array(
+        '@libs' => implode(', ', $missing_libraries),
+      )),
+    );
+  }
+
+  return $requirements;
+}
