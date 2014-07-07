@@ -65,18 +65,16 @@ function js_defer_js_alter(&$javascript) {
   if (!empty($deferred_files)) {
     // Add the library that will do the lazy loading.
     libraries_load('lazyload');
-    // Add the library used for the signaling.
-    libraries_load('EventEmitter');
-
+    // Add the script to load deferred scripts
     drupal_add_js(drupal_get_path('module', 'js_defer') . '/js/lazy-load-js.js');
   }
 }
 
 /**
- * Helper function to defer script loading to when an event is emitted.
+ * Helper function to defer script loading to when an queue is triggerd in js.
  *
- * @param string $event_name
- *   The name of the event that will trigger the script load.
+ * @param string $queue_name
+ *   The name of the queue of scripts to associate this to.
  * @param array $scripts
  *   Array of scripting information with scripts to load. Each element is either
  *   the absolute url for the external scripts or the drupal js identifier as in
@@ -89,13 +87,13 @@ function js_defer_js_alter(&$javascript) {
  * variants registering our libraries with hook_libraries_info() and then
  * calling libraries_load('libname', 'minified').
  */
-function drupal_add_deferred_js($event_name, $scripts, $additional_settings) {
+function drupal_add_deferred_js($queue_name, $scripts, $additional_settings) {
   // In case there is data under the scripts key, unset it.
   unset($additional_settings['scripts']);
-  $settings = array($event_name => array(
+  $settings = array($queue_name => array(
     'scripts' => array(),
   ) + $additional_settings);
-  $ev_settings = &$settings[$event_name]['scripts'];
+  $ev_settings = &$settings[$queue_name]['scripts'];
   foreach ($scripts as $script) {
     // Check if the URL is absolute or relative.
     $url_parts = parse_url($script);
@@ -109,7 +107,7 @@ function drupal_add_deferred_js($event_name, $scripts, $additional_settings) {
     }
   }
   // Add the settings array.
-  drupal_add_js(array('lazyLoadJS' => $settings), 'setting');
+  drupal_add_js(array('js_defer' => $settings), 'setting');
 }
 
 /**
@@ -140,56 +138,5 @@ function js_defer_libraries_info() {
       ),
     ),
   );
-  $libraries['EventEmitter'] = array(
-    // Only used in administrative UI of Libraries API.
-    'name' => 'Event Emitter',
-    'vendor url' => 'https://github.com/Wolfy87/EventEmitter',
-    'download url' => 'https://github.com/Wolfy87/EventEmitter/releases/latest',
-    'version callback' => 'js_defer_get_npm_version',
-    'version arguments' => array(
-      'package' => 'package.json',
-    ),
-    'files' => array(
-      // 'js' and 'css' follow the syntax of hook_library(), but file paths are
-      // relative to the library path.
-      'js' => array(
-        'EventEmitter.js' => array('group' => JS_LIBRARY),
-      ),
-    ),
-    'variants' => array(
-      // All properties defined for 'minified' override top-level properties.
-      'minified' => array(
-        'files' => array(
-          'js' => array(
-            'EventEmitter.min.js' => array('group' => JS_LIBRARY),
-          ),
-        ),
-      ),
-    ),
-  );
   return $libraries;
-}
-
-/**
- * Gets the version of an npm package.
- *
- * @param array $library
- *   The library string as described in hook_libraries_info.
- * @param array $options
- *   Additional options.
- *
- * @return string
- *   The version string or NULL.
- */
-function js_defer_get_npm_version($library, $options) {
-  $options += array(
-    'package' => '',
-  );
-  $file = DRUPAL_ROOT . '/' . $library['library path'] . '/' . $options['package'];
-  if (empty($options['package']) || !file_exists($file)) {
-    return;
-  }
-  $content = file_get_contents($file);
-  $package = drupal_json_decode($content);
-  return empty($package['version']) ? NULL : $package['version'];
 }

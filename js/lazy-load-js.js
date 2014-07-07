@@ -1,34 +1,43 @@
 /**
  * JS Queue
- *   Load in a set of scripts when certain event has fired.
+ *   Load a queue of scripts on demand.
  */
-/*global EventEmitter,LazyLoad*/
-(function ($, Drupal, EventEmitter, LazyLoad, window) {
-  var Events = Drupal.Events || (Drupal.Events = new EventEmitter());
+/*global LazyLoad*/
+(function ($, Drupal, LazyLoad, window) {
 
-  Drupal.behaviors.lazyLoadScripts = {
+  Drupal.behaviors.js_defer = {
     attach: function (context, settings) {
-      var fireBehaviors = function () {
-        // Make sure we don't get into infinite recursion.
-        if (typeof settings.lazyLoadJS[eventName].fired === 'undefined') {
-          Drupal.attachBehaviors(document, Drupal.settings);
-        }
-        settings.lazyLoadJS[eventName].fired = true;
-      };
-      for (var eventName in settings.lazyLoadJS) {
-        Events.addOnceListener(eventName, function () {
-          LazyLoad.js(settings.lazyLoadJS[eventName].scripts, fireBehaviors)
-        });
-
-        if (settings.lazyLoadJS[eventName].fallback === 'timeout') {
-          // If the code that triggers the event fails to trigger it, we need to
-          // provide a fallback timeout that will trigger it. This has the
-          // drawback that the event will may be triggered first by the timeout.
-          window.setTimeout(function () {
-            Events.emit(eventName);
-          }, settings.lazyLoadJS[eventName].timeout * 1000);
+      for (var queueName in settings.js_defer) {
+        // If the code that triggers the queue fails to trigger it, then
+        // we provide a fallback timeout that will trigger it. This has the
+        // drawback that the queue may be triggered by the timeout.
+        if (settings.js_defer[queueName].fallback === 'timeout') {
+          setTimeout($.proxy(Drupal, 'js_defer_load', queueName),
+            settings.js_defer[queueName].timeout * 1000);
         }
       }
     }
   };
-})(jQuery, Drupal, EventEmitter, LazyLoad, window);
+
+  /**
+   * Load a named set of scripts
+   *
+   * @param {string} queueName
+   *   Name of the queue to claim is ready.
+   */
+  Drupal.js_defer_load = function (queueName) {
+    // Ensure we that have scripts to load
+    if (!Drupal.settings.js_defer[queueName] || !Drupal.settings.js_defer[queueName].scripts.length) {
+      return;
+    }
+    // Ensure we that have not yet queued these scripts
+    if (Drupal.settings.js_defer[queueName].once) {
+      return;
+    }
+    Drupal.settings.js_defer[queueName].once = true;
+    LazyLoad.js(Drupal.settings.js_defer[queueName].scripts, function () {
+      Drupal.attachBehaviors(document, Drupal.settings);
+    });
+  };
+
+})(jQuery, Drupal, LazyLoad, this);
