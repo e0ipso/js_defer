@@ -1,9 +1,10 @@
 JS Defer
 ========
 
-Drupal module to defer JS loading after a signal. This is useful to give some
-scripts priority in front of others. This is not done to make the scripts load
-faster, but to make give their XHRs priority against the deferred ones.
+Drupal module to defer JS loading after a signal, it is a JavaScript Quality of
+Service oriented module. This is useful to give some scripts priority in front
+of others. This is not done to make the scripts load faster, but to make give
+their XHRs priority against the deferred ones.
 
 ## Scenario
 
