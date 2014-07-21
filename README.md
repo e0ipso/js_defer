@@ -30,8 +30,6 @@ ready. And you want it **fast**.
 
 This module depends on two javascript libraries:
 
-  - The [EventEmitter](https://github.com/Wolfy87/EventEmitter) library to
-  signal when the scripts can start loading.
   - The [LazyLoad](https://github.com/rgrove/lazyload) library to do the actual
   lazy load of the specified scripts.
 
@@ -41,7 +39,7 @@ This module will not do anything on its own, it will need an implementer module.
 The implementer module will be responsible of:
 
   - Listing the scripts to defer in PHP by implementing `hook_js_defer_info`.
-  - Triggering the javascript event that will signal the lazy load start.
+  - Triggering the javascript queue that will signal the lazy load start.
 
 ```php
 /**
@@ -50,7 +48,7 @@ The implementer module will be responsible of:
 function implementer_js_defer_info() {
   if (user_visiting_video_page()) {
     // Deferred styles for video pages.
-    $deferred['js-event'] = array(
+    $deferred['js-queue'] = array(
       'fallback' => 'timeout',
       'timeout' => 10,
       'scripts' => array(
@@ -61,7 +59,7 @@ function implementer_js_defer_info() {
   }
   else {
     // Deferred styles for the rest of pages.
-    $deferred['js-event-2'] = array(
+    $deferred['js-queue-2'] = array(
       'fallback' => FALSE,
       'scripts' => array(
         'sites/all/modules/module-name/js/javascript-file3.js',
@@ -73,12 +71,11 @@ function implementer_js_defer_info() {
 }
 ```
 
-And then trigger the event whenever you need:
+And then trigger the queue whenever you need:
 
 ```js
 // Player informs that the first buffer is ready to be played. It's time to
 // allow all other scripts to load their stuff.
-var event = new EventEmitter();
-event.emit('js-event');
+Drupal.js_defer_load('js-queue');
 // The deferred scripts start to load now.
 ```

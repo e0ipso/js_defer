@@ -21,7 +21,7 @@ function js_defer_requirements($phase) {
   }
 
   // Check if the JS libraries are present.
-  $libraries = array('EventEmitter', 'lazyload');
+  $libraries = array('lazyload');
   $missing_libraries = array();
   foreach ($libraries as $library_name) {
     $library_info = libraries_get_path($library_name);
