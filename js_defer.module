@@ -45,7 +45,13 @@ function js_defer_js_alter(&$javascript) {
             $aggregated_files[$deferred_script_candidate] = $script_definition;
           }
           else {
-            $deferred_files[] = $deferred_script_candidate;
+            // Add the raw url to be deferred.
+            $script_url = $deferred_script_candidate;
+            if (!empty($javascript[$deferred_script_candidate]['version'])) {
+              $js_version_string = variable_get('drupal_js_version_query_string', 'v=');
+              $script_url .= '?' . $js_version_string . $javascript[$deferred_script_candidate]['version'];
+            }
+            $deferred_files[] = $script_url;
           }
         }
         if ($javascript[$deferred_script_candidate]['type'] !== 'inline') {
@@ -94,9 +100,19 @@ function drupal_add_deferred_js($queue_name, $scripts, $additional_settings) {
     'scripts' => array(),
   ) + $additional_settings);
   $ev_settings = &$settings[$queue_name]['scripts'];
+
+  // Since JavaScript may look for arguments in the URL and act on them, some
+  // third-party code might require the use of a different query string.
+  $js_version_string = variable_get('drupal_js_version_query_string', 'v=');
+  $default_query_string = variable_get('css_js_query_string', '0');
   foreach ($scripts as $script) {
     // Check if the URL is absolute or relative.
     $url_parts = parse_url($script);
+
+    // Add que version string ass done in drupal_get_js.
+    if (strpos($script, $js_version_string) === FALSE) {
+      $script .= '?' . $default_query_string;
+    }
     if (empty($url_parts['scheme']) && strpos($script, '//') !== 0) {
       // NOTE: We need to ensure these are absolute/site-relative for the
       // front-end
