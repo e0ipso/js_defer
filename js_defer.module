@@ -41,7 +41,7 @@ function js_defer_js_alter(&$javascript) {
         else if ($javascript[$deferred_script_candidate]['type'] === 'file') {
           // Don't defer this file directly, add it to a aggragated file and
           // then defer that one.
-          if (variable_get('proprocess_js', FALSE)) {
+          if (variable_get('preprocess_js', FALSE)) {
             $aggregated_files[$deferred_script_candidate] = $script_definition;
           }
           else {
