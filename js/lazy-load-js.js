@@ -11,8 +11,11 @@
         // If the code that triggers the queue fails to trigger it, then
         // we provide a fallback timeout that will trigger it. This has the
         // drawback that the queue may be triggered by the timeout.
-        if (settings.js_defer[queueName].fallback === 'timeout') {
-          setTimeout($.proxy(Drupal, 'js_defer_load', queueName),
+        if (settings.js_defer[queueName].fallback === 'timeout' &&
+           !settings.js_defer[queueName].timer
+        ) {
+          settings.js_defer[queueName].timer = setTimeout(
+            $.proxy(Drupal, 'js_defer_load', queueName),
             settings.js_defer[queueName].timeout * 1000);
         }
       }
