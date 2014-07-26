@@ -62,8 +62,15 @@ function js_defer_js_alter(&$javascript) {
       }
     }
     if (variable_get('preprocess_js') && !empty($aggregated_files)) {
-      // Build the aggregated file and add it to the deferred list at the end.
-      $uri = drupal_build_js_cache($aggregated_files);
+      // Rekey deferred files for aggregation to include alterations of 'data'
+      // @see drupal_add_js()
+      $rekeyed_aggregated_files = array();
+      foreach ($aggregated_files as $item) {
+        $rekeyed_aggregated_files[$item['data']] = $item;
+      }
+      // Build the aggregated file
+      $uri = drupal_build_js_cache($rekeyed_aggregated_files);
+      // Add the aggregated file to the end of the deferred list the end
       $deferred_files[] = file_create_url($uri);
     }
     drupal_add_deferred_js($context, $deferred_files, $deferred_info);
