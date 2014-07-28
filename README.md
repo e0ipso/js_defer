@@ -28,7 +28,7 @@ ready. And you want it **fast**.
 
 ## Dependencies
 
-This module depends on two javascript libraries:
+This module depends on the following javascript libraries:
 
   - The [LazyLoad](https://github.com/rgrove/lazyload) library to do the actual
   lazy load of the specified scripts.
