@@ -36,7 +36,7 @@ This module depends on two javascript libraries:
 ## Usage
 
 This module will not do anything on its own, it will need an implementer module.
-The implementer module will be responsible of:
+The implementer module will be responsible for:
 
   - Listing the scripts to defer in PHP by implementing `hook_js_defer_info`.
   - Triggering the javascript queue that will signal the lazy load start.
