@@ -29,7 +29,7 @@ function js_defer_js_alter(&$javascript) {
   foreach ($info as $context => $deferred_info) {
     $deferred_scripts = empty($deferred_info['scripts']) ? array() : $deferred_info['scripts'];
     foreach ($javascript as $deferred_script_candidate => $script_definition) {
-      if (in_array($deferred_script_candidate, $deferred_scripts)) {
+      if (in_array($deferred_script_candidate, $deferred_scripts, TRUE)) {
         // Put everything at the bottom of the queue when loading scripts.
         $javascript[$deferred_script_candidate]['group'] = JS_DEFERRED;
         // If Drupal serves the file then we add the file to the aggregation.
