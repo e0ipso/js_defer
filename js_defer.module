@@ -73,12 +73,13 @@ function js_defer_js_alter(&$javascript) {
       // Add the aggregated file to the end of the deferred list the end
       $deferred_files[] = file_create_url($uri);
     }
-    drupal_add_deferred_js($context, $deferred_files, $deferred_info);
   }
   if (!empty($deferred_files)) {
+    // Add the deferred files to settings.
+    drupal_add_deferred_js($context, $deferred_files, $deferred_info);
     // Add the library that will do the lazy loading.
     libraries_load('lazyload');
-    // Add the script to load deferred scripts
+    // Add the script to load deferred scripts.
     drupal_add_js(drupal_get_path('module', 'js_defer') . '/js/lazy-load-js.js');
   }
 }
@@ -129,7 +130,19 @@ function drupal_add_deferred_js($queue_name, $scripts, $additional_settings) {
       $ev_settings[] = $script;
     }
   }
-  // Add the settings array.
+
+  // If we already have a js_defer setting, then append to it.
+  $key = 'js_defer';
+  $javascript = &drupal_static('drupal_add_js');
+  if (!empty($javascript['settings']['data'])) {
+    foreach ($javascript['settings']['data'] as $index => &$data) {
+      if (isset($data[$key][$queue_name]['scripts'])) {
+        $data[$key][$queue_name]['scripts'] += $scripts;
+        return;
+      }
+    }
+  }
+  // Otherwise add the setting.
   drupal_add_js(array('js_defer' => $settings), 'setting');
 }
 
