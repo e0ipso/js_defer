@@ -76,7 +76,7 @@ function js_defer_js_alter(&$javascript) {
   }
   if (!empty($deferred_files)) {
     // Add the deferred files to settings.
-    drupal_add_deferred_js($context, $deferred_files, $deferred_info);
+    drupal_add_deferred_js($javascript, $context, $deferred_files, $deferred_info);
     // Add the library that will do the lazy loading.
     libraries_load('lazyload');
     // Add the script to load deferred scripts.
@@ -87,6 +87,8 @@ function js_defer_js_alter(&$javascript) {
 /**
  * Helper function to defer script loading to when an queue is triggerd in js.
  *
+ * @param array $javascript
+ *   Global $javascript from drupal_get_js/hook_alter_js
  * @param string $queue_name
  *   The name of the queue of scripts to associate this to.
  * @param array $scripts
@@ -101,7 +103,7 @@ function js_defer_js_alter(&$javascript) {
  * variants registering our libraries with hook_libraries_info() and then
  * calling libraries_load('libname', 'minified').
  */
-function drupal_add_deferred_js($queue_name, $scripts, $additional_settings) {
+function drupal_add_deferred_js(&$javascript, $queue_name, $scripts, $additional_settings) {
   // In case there is data under the scripts key, unset it.
   unset($additional_settings['scripts']);
   $settings = array($queue_name => array(
@@ -133,11 +135,10 @@ function drupal_add_deferred_js($queue_name, $scripts, $additional_settings) {
 
   // If we already have a js_defer setting, then append to it.
   $key = 'js_defer';
-  $javascript = &drupal_static('drupal_add_js');
   if (!empty($javascript['settings']['data'])) {
     foreach ($javascript['settings']['data'] as $index => &$data) {
       if (isset($data[$key][$queue_name]['scripts'])) {
-        $data[$key][$queue_name]['scripts'] += $scripts;
+        $data[$key][$queue_name]['scripts'] += $ev_settings;
         return;
       }
     }
