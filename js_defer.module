@@ -14,8 +14,7 @@ define('JS_DEFERRED', 200);
  * Implements hook_js_alter().
  */
 function js_defer_js_alter(&$javascript) {
-  // First we need to identify the libraries that are messing with the load of:
-  //   - The player for the video detail page.
+  // First we need to identify scripts to be deferred
 
   // All these scripts should not load inside the preprocessed file and should
   // be deferred to load after the player is ready.
@@ -39,7 +38,7 @@ function js_defer_js_alter(&$javascript) {
           $deferred_files[] = $deferred_script_candidate;
         }
         else if ($javascript[$deferred_script_candidate]['type'] === 'file') {
-          // Don't defer this file directly, add it to a aggragated file and
+          // Don't defer this file directly, add it to a aggregated file and
           // then defer that one.
           if (variable_get('preprocess_js', FALSE)) {
             $aggregated_files[$deferred_script_candidate] = $script_definition;
@@ -99,7 +98,7 @@ function js_defer_js_alter(&$javascript) {
  *   Additional settings to be passed to the LazyLoad js settings object.
  *
  * @todo We need to decide when to load the minified version and when the full
- * one (mabe using preprocess_js). To load one or the other we could use library
+ * one (maybe using preprocess_js). To load one or the other we could use library
  * variants registering our libraries with hook_libraries_info() and then
  * calling libraries_load('libname', 'minified').
  */
