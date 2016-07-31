@@ -16,6 +16,8 @@
  *     * 'timeout': Trigger the queue to load after a timeout.
  *     * FALSE: No fallback.
  *   - timeout: The amount of seconds before the queue is manually started.
+ *   - reattach_all_behaviors: Set to false if you only want to run new
+ *     behaviors after deferred files have been loaded. Defaults to TRUE
  *   - scripts: An array of file names as the keys for the argument in
  *     hook_js_alter
  */
@@ -23,6 +25,7 @@ function hook_js_defer_info() {
   $deferred['js-queue'] = array(
     'fallback' => 'timeout',
     'timeout' => 10,
+    'reattach_all_behaviors': FALSE,
     'scripts' => array(
       'sites/all/modules/module-name/js/javascript-file1.js',
       'sites/all/modules/module-name/js/javascript-file2.js',
@@ -30,6 +33,7 @@ function hook_js_defer_info() {
   );
   $deferred['js-queue-2'] = array(
     'fallback' => FALSE,
+    'reattach_all_behaviors': TRUE,
     'scripts' => array(
       'sites/all/modules/module-name/js/javascript-file3.js',
       'sites/all/modules/module-name/js/javascript-file4.js',
