@@ -131,6 +131,10 @@ function drupal_add_deferred_js(&$javascript, $queue_name, $scripts, $additional
       $ev_settings[] = $script;
     }
   }
+  // Add these scripts as an associative array so that it becomes an object when
+  // converted to JavaScript. This ensures that AJAX requests don't overwrite
+  // existing deferred scripts in Drupal.settings.
+  $settings[$queue_name]['scripts'] = array_combine($ev_settings, $ev_settings);
 
   // If we already have a js_defer setting, then append to it.
   $key = 'js_defer';

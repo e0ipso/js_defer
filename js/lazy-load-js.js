@@ -32,7 +32,9 @@
     var existingBehaviors;
 
     // Ensure we that have scripts to load
-    if (!Drupal.settings.js_defer[queueName] || !Drupal.settings.js_defer[queueName].scripts.length) {
+    if (typeof Drupal.settings.js_defer[queueName] === "undefined" ||
+      typeof Drupal.settings.js_defer[queueName].scripts === "undefined"
+    ) {
       return;
     }
     // Ensure we that have not yet queued these scripts
@@ -43,11 +45,16 @@
     // Make sure this last bit isn't run twice for the same queue
     Drupal.settings.js_defer[queueName].once = true;
 
+    // The scripts come in as an object to ensure there are no duplicates, but
+    // we need them to be an array. The keys of the object properties are
+    // identical to the values, so we can just use Object.keys().
+    var scripts = Object.keys(Drupal.settings.js_defer[queueName].scripts);
+
     // Run only new behaviors added from the queue, or load all, depending on
     // queue's reattach_all_behaviors setting.
     if (Drupal.settings.js_defer[queueName].reattach_all_behaviors === false) {
       existingBehaviors = $.extend(true, {}, Drupal.behaviors);
-      LazyLoad.js(Drupal.settings.js_defer[queueName].scripts, function () {
+      LazyLoad.js(scripts, function () {
         // Execute only new behaviors since we ran the queue
         $.each(Drupal.behaviors, function (index) {
           if (typeof existingBehaviors[index] === 'undefined' && $.isFunction(this.attach)) {
@@ -56,7 +63,7 @@
         });
       });
     } else {
-      LazyLoad.js(Drupal.settings.js_defer[queueName].scripts, function () {
+      LazyLoad.js(scripts, function () {
         Drupal.attachBehaviors(document, Drupal.settings);
       });
     }
